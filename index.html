@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Console</title>
+  <style>
+    /* Styles for layout, buttons, theme, and table */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #121212;
+      color: #ffffff;
+    }
+    .button-container, .filter-container {
+      margin-bottom: 20px;
+    }
+    button, select {
+      padding: 10px 15px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    .theme-toggle-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    .mode-toggle {
+      background-color: #333;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+    }
+    body.light-mode .mode-toggle {
+      background-color: #e0e0e0;
+      color: #000;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    .details {
+      display: none;
+      background-color: #333;
+      color: #fff;
+    }
+    body.light-mode {
+      background-color: #ffffff;
+      color: #000000;
+    }
+    body.light-mode .details {
+      background-color: #f1f1f1;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+<div class="theme-toggle-container">
+  <button class="mode-toggle" onclick="toggleMode()">Toggle Mode</button>
+</div>
+
+<div class="button-container">
+  <button onclick="loadData('Trove')">Trove</button>
+  <button onclick="loadData('Redeem')">Redeem</button>
+  <button onclick="loadData('Stake')">Stake</button>
+  <button onclick="loadData('Liquidate')">Liquidate</button>
+  <button onclick="loadData('Position')">Position</button>
+</div>
+
+<div class="filter-container" id="assetFilterContainer" style="display: none;">
+  <label for="assetFilter">Filter by Asset:</label>
+  <select id="assetFilter" onchange="applyAssetFilter()">
+    <option value="all">All Assets</option>
+  </select>
+</div>
+
+<table id="transactionTable">
+  <thead id="tableHead"></thead>
+  <tbody id="transactionBody"></tbody>
+</table>
+
+<script>
+  const apiConfig = {
+    "Trove": {
+      url: "/api/trove",  // Use the proxy URL on Vercel
+      displayFields: ["walletaddress", "timestamp", "operation", "debt", "coll"],
+      detailFields: ["operation", "timestamp", "walletaddress", "transactionhash", "debt", "coll"],
+      filterField: "asset"
+    },
+    // Additional configurations for Redeem, Stake, etc., can go here
+  };
+
+  let currentData = [];
+  let currentFilterField = null;
+  let currentType = null;
+
+  async function loadData(type) {
+    const config = apiConfig[type];
+    if (!config) return;
+
+    currentType = type;
+    currentFilterField = config.filterField || null;
+    document.getElementById('assetFilterContainer').style.display = currentFilterField ? 'block' : 'none';
+
+    try {
+      const response = await fetch(config.url);
+      const data = await response.json();
+      currentData = data;
+
+      if (currentFilterField) populateAssetFilter(data, currentFilterField);
+      populateTable(data, config.displayFields, config.detailFields);
+    } catch (error) {
+      console.error(`Error fetching data for ${type}:`, error);
+    }
+  }
+
+  function populateAssetFilter(data, filterField) {
+    const assetFilter = document.getElementById('assetFilter');
+    assetFilter.innerHTML = '<option value="all">All Assets</option>';
+    const uniqueAssets = [...new Set(data.map(item => item[filterField]).filter(asset => asset))];
+    uniqueAssets.forEach(asset => {
+      const option = document.createElement('option');
+      option.value = asset;
+      option.textContent = asset;
+      assetFilter.appendChild(option);
+    });
+  }
+
+  function applyAssetFilter() {
+    const selectedAsset = document.getElementById('assetFilter').value;
+    const filteredData = selectedAsset === 'all' ? currentData : currentData.filter(item => item[currentFilterField] === selectedAsset);
+    const config = apiConfig[currentType];
+    populateTable(filteredData, config.displayFields, config.detailFields);
+  }
+
+  function populateTable(data, displayFields, detailFields) {
+    const tableHead = document.getElementById('tableHead');
+    const tableBody = document.getElementById('transactionBody');
+    tableHead.innerHTML = '';
+    tableBody.innerHTML = '';
+
+    const headerRow = document.createElement('tr');
+    displayFields.forEach(field => {
+      const th = document.createElement('th');
+      th.textContent = field.charAt(0).toUpperCase() + field.slice(1);
+      headerRow.appendChild(th);
+    });
+    tableHead.appendChild(headerRow);
+
+    data.forEach((item, index) => {
+      const row = document.createElement('tr');
+      displayFields.forEach(field => {
+        const td = document.createElement('td');
+        td.textContent = item[field] !== undefined ? item[field] : 'N/A';
+        row.appendChild(td);
+      });
+
+      row.addEventListener('click', () => {
+        const detailsRow = document.getElementById(`details-${index}`);
+        detailsRow.style.display = detailsRow.style.display === 'none' ? 'table-row' : 'none';
+      });
+      tableBody.appendChild(row);
+
+      const detailsRow = document.createElement('tr');
+      detailsRow.id = `details-${index}`;
+      detailsRow.classList.add('details');
+      const detailContent = detailFields.map(field => `<strong>${field}:</strong> ${item[field] !== undefined ? item[field] : 'N/A'}`).join('<br>');
+      detailsRow.innerHTML = `<td colspan="${displayFields.length}">${detailContent}</td>`;
+      tableBody.appendChild(detailsRow);
+    });
+  }
+
+  function toggleMode() {
+    document.body.classList.toggle('light-mode');
+  }
+</script>
+
+</body>
+</html>
