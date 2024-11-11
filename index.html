@@ -5,60 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Console</title>
   <style>
-    /* Styles for layout, buttons, theme, and table */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #121212;
-      color: #ffffff;
-    }
-    .button-container, .filter-container {
-      margin-bottom: 20px;
-    }
-    button, select {
-      padding: 10px 15px;
-      margin-right: 10px;
-      cursor: pointer;
-    }
-    .theme-toggle-container {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-    .mode-toggle {
-      background-color: #333;
-      color: #fff;
-      border: none;
-      padding: 10px 15px;
-      cursor: pointer;
-    }
-    body.light-mode .mode-toggle {
-      background-color: #e0e0e0;
-      color: #000;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-    .details {
-      display: none;
-      background-color: #333;
-      color: #fff;
-    }
-    body.light-mode {
-      background-color: #ffffff;
-      color: #000000;
-    }
-    body.light-mode .details {
-      background-color: #f1f1f1;
-      color: #333;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #121212; color: #ffffff; }
+    .button-container, .filter-container { margin-bottom: 20px; }
+    button, select { padding: 10px 15px; margin-right: 10px; cursor: pointer; }
+    .theme-toggle-container { position: absolute; top: 20px; right: 20px; }
+    .mode-toggle { background-color: #333; color: #fff; border: none; padding: 10px 15px; cursor: pointer; }
+    body.light-mode .mode-toggle { background-color: #e0e0e0; color: #000; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    .details { display: none; background-color: #333; color: #fff; }
+    body.light-mode { background-color: #ffffff; color: #000000; }
+    body.light-mode .details { background-color: #f1f1f1; color: #333; }
   </style>
 </head>
 <body>
@@ -90,12 +47,34 @@
 <script>
   const apiConfig = {
     "Trove": {
-      url: "/api/trove",  // Use the proxy URL on Vercel
+      url: "/api/trove",
       displayFields: ["walletaddress", "timestamp", "operation", "debt", "coll"],
       detailFields: ["operation", "timestamp", "walletaddress", "transactionhash", "debt", "coll"],
       filterField: "asset"
     },
-    // Additional configurations for Redeem, Stake, etc., can go here
+    "Redeem": {
+      url: "/api/redeem",
+      displayFields: ["transactionhash", "timestamp"],
+      detailFields: ["timestamp", "asset", "attempteddebtamount", "actualdebtamount", "collsent"],
+      filterField: "asset"
+    },
+    "Stake": {
+      url: "/api/stake",
+      displayFields: ["transactionhash", "timestamp"],
+      detailFields: ["timestamp", "depositer", "transactionhash", "newdeposit"]
+    },
+    "Liquidate": {
+      url: "/api/liquidate",
+      displayFields: ["walletaddress", "timestamp", "operation"],
+      detailFields: ["timestamp", "asset", "transactionhash", "walletaddress", "debt", "coll", "operation"],
+      filterField: "asset"
+    },
+    "Position": {
+      url: "/api/position",
+      displayFields: ["position", "walletaddress", "nltv"],
+      detailFields: ["position", "walletaddress", "asset", "debt", "coll", "nltv", "status"],
+      filterField: "asset"
+    }
   };
 
   let currentData = [];

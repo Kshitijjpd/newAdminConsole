@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
     try {
-      const response = await fetch('http://34.170.86.192/admin/trove');
+      const response = await fetch('http://34.170.86.192/admin/redeem');
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
       res.status(200).json(data);
