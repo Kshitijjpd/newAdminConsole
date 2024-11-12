@@ -54,24 +54,24 @@
     },
     "Redeem": {
       url: "/api/redeem",
-      displayFields: ["transactionhash", "timestamp"],
+      displayFields: ["timestamp", "asset", "attempteddebtamount", "actualdebtamount", "collsent"],
       detailFields: ["timestamp", "asset", "attempteddebtamount", "actualdebtamount", "collsent"],
       filterField: "asset"
     },
     "Stake": {
       url: "/api/stake",
-      displayFields: ["transactionhash", "timestamp"],
+      displayFields: ["timestamp", "depositer", "transactionhash", "newdeposit"],
       detailFields: ["timestamp", "depositer", "transactionhash", "newdeposit"]
     },
     "Liquidate": {
       url: "/api/liquidate",
-      displayFields: ["walletaddress", "timestamp", "operation"],
+      displayFields: ["timestamp", "asset", "transactionhash", "walletaddress", "debt", "coll", "operation"],
       detailFields: ["timestamp", "asset", "transactionhash", "walletaddress", "debt", "coll", "operation"],
       filterField: "asset"
     },
     "Position": {
       url: "/api/position",
-      displayFields: ["position", "walletaddress", "nltv"],
+      displayFields: ["position", "walletaddress", "assets","debt", "coll", "nltv", "status"],
       detailFields: ["position", "walletaddress", "asset", "debt", "coll", "nltv", "status"],
       filterField: "asset"
     }
